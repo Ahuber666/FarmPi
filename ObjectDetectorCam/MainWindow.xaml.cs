@@ -12,7 +12,7 @@ using System.Windows.Shapes;
 
 namespace ObjectDetectorCam
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : System.Windows.Window
     {
         private VideoCapture? _capture;
         private CancellationTokenSource? _cts;
