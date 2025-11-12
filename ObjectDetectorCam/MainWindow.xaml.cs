@@ -1,6 +1,8 @@
+using DirectShowLib;
 using Microsoft.ML.OnnxRuntime;
 using OpenCvSharp;
 using OpenCvSharp.WpfExtensions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -21,12 +23,13 @@ namespace ObjectDetectorCam
         // ---- Customize these if needed ----
         private readonly string _modelPath = System.IO.Path.Combine("model", "model.onnx");
         private readonly string _labelsPath = System.IO.Path.Combine("model", "labels.txt");
-        private readonly int _cameraIndex = 0;
+        private readonly string _preferredCameraName = "Logitech BRIO";
         private readonly float _scoreThreshold = 0.40f;
         private readonly float _nmsThreshold = 0.45f;
         // If you know your model input size, set it here (e.g., 320, 320 or 640, 640).
         // The engine will discover it automatically, but setting explicitly can avoid one warmup pass.
         private readonly (int W, int H)? _knownInputWH = null; // e.g. (640, 640)
+        private string? _activeCameraName;
         // -----------------------------------
 
         public MainWindow()
@@ -51,16 +54,26 @@ namespace ObjectDetectorCam
                 return;
             }
 
-            _capture = new VideoCapture(_cameraIndex);
+            var cameraMatch = FindCameraByName(_preferredCameraName);
+            if (cameraMatch is null)
+            {
+                MessageBox.Show($"Could not find a webcam whose name contains '{_preferredCameraName}'.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                Close();
+                return;
+            }
+
+            var (cameraIndex, detectedName) = cameraMatch.Value;
+            _activeCameraName = detectedName;
+            _capture = new VideoCapture(cameraIndex, VideoCaptureAPIs.DSHOW);
             if (!_capture.IsOpened())
             {
-                MessageBox.Show("Could not open webcam.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Could not open webcam '{_activeCameraName}'.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 Close();
                 return;
             }
 
             _cts = new CancellationTokenSource();
-            StatusText.Text = $"Model: {System.IO.Path.GetFileName(_modelPath)} — Camera: {_cameraIndex}";
+            StatusText.Text = $"Model: {System.IO.Path.GetFileName(_modelPath)} — Camera: {_activeCameraName}";
 
             await Task.Run(() => CaptureLoop(_cts.Token));
         }
@@ -167,6 +180,21 @@ namespace ObjectDetectorCam
                     StatusText.Text = $"Detections: {detections.Count}";
                 });
             }
+        }
+
+        private static (int Index, string Name)? FindCameraByName(string preferredName)
+        {
+            var devices = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
+            for (int i = 0; i < devices.Length; i++)
+            {
+                var name = devices[i].Name ?? string.Empty;
+                if (name.IndexOf(preferredName, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return (i, name);
+                }
+            }
+
+            return null;
         }
     }
 }
