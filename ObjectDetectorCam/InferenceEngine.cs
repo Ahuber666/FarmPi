@@ -45,7 +45,7 @@ namespace ObjectDetectorCam
             {
                 // Try to infer from input shape [1,3,H,W]
                 var md = _session.InputMetadata[_inputName];
-                var dims = md.Dimensions.Select(d => d.HasValue ? d.Value : 0).ToArray();
+                var dims = md.Dimensions.Select(d => d > 0 ? d : 0).ToArray();
                 // Fallback if dynamic:
                 _inH = dims.Length >= 3 ? Math.Abs(dims[^2]) : 640;
                 _inW = dims.Length >= 4 ? Math.Abs(dims[^1]) : 640;
