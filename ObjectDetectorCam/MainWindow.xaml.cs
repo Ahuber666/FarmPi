@@ -97,8 +97,8 @@ namespace ObjectDetectorCam
             // Try to match window size initially
             this.Dispatcher.Invoke(() =>
             {
-                Overlay.Width = this.ActualWidth;
-                Overlay.Height = this.ActualHeight;
+                Canvas.Width = this.ActualWidth;
+                Canvas.Height = this.ActualHeight;
             });
 
             while (!token.IsCancellationRequested)
@@ -134,9 +134,9 @@ namespace ObjectDetectorCam
                     double offsetX = (displayW - renderW) / 2.0;
                     double offsetY = (displayH - renderH) / 2.0;
 
-                    Overlay.Width = displayW;
-                    Overlay.Height = displayH;
-                    Overlay.Children.Clear();
+                    Canvas.Width = displayW;
+                    Canvas.Height = displayH;
+                    Canvas.Children.Clear();
 
                     foreach (var det in detections)
                     {
@@ -154,9 +154,9 @@ namespace ObjectDetectorCam
                             StrokeThickness = 2,
                             Fill = new SolidColorBrush(Color.FromArgb(30, 0, 255, 0))
                         };
-                        Canvas.SetLeft(r, x);
-                        Canvas.SetTop(r, y);
-                        Overlay.Children.Add(r);
+                        System.Windows.Controls.Canvas.SetLeft(r, x);
+                        System.Windows.Controls.Canvas.SetTop(r, y);
+                        Canvas.Children.Add(r);
 
                         var labelText = $"{det.Label} {(det.Confidence * 100):0}%";
                         var tb = new System.Windows.Controls.Border
@@ -172,9 +172,9 @@ namespace ObjectDetectorCam
                                 Margin = new Thickness(6, 2, 6, 2)
                             }
                         };
-                        Canvas.SetLeft(tb, x);
-                        Canvas.SetTop(tb, y - 24 < 0 ? 0 : y - 24);
-                        Overlay.Children.Add(tb);
+                        System.Windows.Controls.Canvas.SetLeft(tb, x);
+                        System.Windows.Controls.Canvas.SetTop(tb, y - 24 < 0 ? 0 : y - 24);
+                        Canvas.Children.Add(tb);
                     }
 
                     StatusText.Text = $"Detections: {detections.Count}";

@@ -8,7 +8,7 @@
         <Image x:Name="VideoImage" Stretch="Uniform" />
 
         <!-- Overlay for boxes & labels -->
-        <Canvas x:Name="Overlay" IsHitTestVisible="False">
+        <Canvas x:Name="Canvas" IsHitTestVisible="False">
             <!-- we add/remove children dynamically each frame -->
         </Canvas>
 
