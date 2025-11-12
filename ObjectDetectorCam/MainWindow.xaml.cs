@@ -21,7 +21,7 @@ namespace ObjectDetectorCam
         // ---- Customize these if needed ----
         private readonly string _modelPath = System.IO.Path.Combine("model", "model.onnx");
         private readonly string _labelsPath = System.IO.Path.Combine("model", "labels.txt");
-        private readonly int _cameraIndex = 0;
+        private readonly string _cameraName = "Logitech BRIO";
         private readonly float _scoreThreshold = 0.40f;
         private readonly float _nmsThreshold = 0.45f;
         // If you know your model input size, set it here (e.g., 320, 320 or 640, 640).
@@ -51,16 +51,16 @@ namespace ObjectDetectorCam
                 return;
             }
 
-            _capture = new VideoCapture(_cameraIndex);
+            _capture = new VideoCapture($"video={_cameraName}", VideoCaptureAPIs.DSHOW);
             if (!_capture.IsOpened())
             {
-                MessageBox.Show("Could not open webcam.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Could not open webcam '{_cameraName}'.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 Close();
                 return;
             }
 
             _cts = new CancellationTokenSource();
-            StatusText.Text = $"Model: {System.IO.Path.GetFileName(_modelPath)} — Camera: {_cameraIndex}";
+            StatusText.Text = $"Model: {System.IO.Path.GetFileName(_modelPath)} — Camera: {_cameraName}";
 
             await Task.Run(() => CaptureLoop(_cts.Token));
         }
